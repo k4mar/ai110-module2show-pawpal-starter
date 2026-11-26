@@ -1,0 +1,76 @@
+classDiagram
+    %% Final UML: matches pawpal_system.py as implemented.
+
+    class Owner {
+        +str name
+        +int available_minutes
+        +list~Pet~ pets
+        +add_pet(pet) Pet
+        +get_pet(name) Pet
+        +get_all_tasks() list~Task~
+        +to_dict() dict
+        +from_dict(data)$ Owner
+        +save_to_json(path)
+        +load_from_json(path)$ Owner
+    }
+
+    class Pet {
+        <<dataclass>>
+        +str name
+        +str species
+        +int age
+        +list~Task~ tasks
+        +add_task(task) Task
+        +remove_task(task) bool
+        +task_count() int
+        +pending_tasks() list~Task~
+        +to_dict() dict
+        +from_dict(data)$ Pet
+    }
+
+    class Task {
+        <<dataclass>>
+        +str description
+        +str time
+        +int duration_minutes
+        +str priority
+        +str frequency
+        +date due_date
+        +bool completed
+        +str pet_name
+        +start_minutes int
+        +end_minutes int
+        +end_time str
+        +mark_complete()
+        +next_occurrence() Task
+        +overlaps(other) bool
+        +to_dict() dict
+        +from_dict(data)$ Task
+    }
+
+    class Scheduler {
+        +Owner owner
+        +get_all_tasks() list~Task~
+        +get_tasks_for_date(day) list~Task~
+        +sort_by_time(tasks)$ list~Task~
+        +sort_by_priority(tasks)$ list~Task~
+        +filter_tasks(pet_name, completed, tasks) list~Task~
+        +mark_task_complete(task) Task
+        +detect_conflicts(tasks) list~str~
+        +build_daily_plan(day) list~PlanEntry~
+        +format_schedule(day) str
+    }
+
+    class PlanEntry {
+        <<dataclass>>
+        +Task task
+        +bool scheduled
+        +str reason
+    }
+
+    Owner "1" o-- "*" Pet : owns
+    Pet "1" *-- "*" Task : has
+    Scheduler --> Owner : reads pets & tasks
+    Scheduler ..> PlanEntry : creates
+    PlanEntry --> Task : wraps
+    Task ..> Task : next_occurrence()
